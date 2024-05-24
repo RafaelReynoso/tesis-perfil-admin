@@ -1,16 +1,39 @@
-# tesis_perfil_admin
+# Proyeco Final de Carrera
 
-A new Flutter project.
+Perfil usuario del PFC hecha en Flutter. Perfil admin.
 
-## Getting Started
+## Descripción del Proyecto
 
-This project is a starting point for a Flutter application.
+Aplicación Móvil para el Rastreo y Gestión de flotas para la empresa de Transportes San Bartolomé SAC. 
+## Instalacion
 
-A few resources to get you started if this is your first Flutter project:
+Para instalar se requiere tener Flutter instalado y un emulador de android:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. **Clonar el repositorio**:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    ```bash
+    git clone https://github.com/RafaelReynoso/tesis-perfil-admin.git
+    ```
+
+2. **Navegar hasta el directorio del proyecto**:
+
+    ```bash
+    cd tesis-perfil-admin
+    ```
+    
+3. **Abrir la terminal e instalar los requerimientos**:
+
+    ```bash
+    flutter pub get
+    ```
+
+4. **Iniciar la aplicación**:
+
+    ```bash
+    flutter run
+    ```
+
+![image](https://github.com/Tecsupsoft/2023-2-pretesis-2023-2-pretesis-grupo-13/assets/67761441/e1296418-a353-437c-a51b-273b2994d7fe)
+
+
+
