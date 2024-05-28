@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "240096896669",
+    "firebase_url": "https://tesis-backend-b2a21-default-rtdb.firebaseio.com",
+    "project_id": "tesis-backend-b2a21",
+    "storage_bucket": "tesis-backend-b2a21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240096896669:android:ee2bd9acfa88bfeb091674",
+        "android_client_info": {
+          "package_name": "com.example.flutter_demo_tesis_conductor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQs5RxiTEw1FG8jWeses80lZhuvxQNQ-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240096896669:android:3313084d41adb847091674",
+        "android_client_info": {
+          "package_name": "com.example.tesis_perfil_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQs5RxiTEw1FG8jWeses80lZhuvxQNQ-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240096896669:android:d5debd7ed7fe3cde091674",
+        "android_client_info": {
+          "package_name": "com.tesis.combi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQs5RxiTEw1FG8jWeses80lZhuvxQNQ-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

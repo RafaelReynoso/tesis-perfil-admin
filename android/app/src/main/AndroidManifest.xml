@@ -3,6 +3,8 @@
         android:label="tesis_perfil_admin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyC0v4buUxcKLcot6jhgmTWkvu-9ub4ynSo"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
