@@ -1,113 +1,137 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:uuid/uuid.dart';
 
-class ConductorMapScreen extends StatefulWidget {
-  const ConductorMapScreen({super.key});
-
+class AdminMapScreen extends StatefulWidget {
   @override
-  _ConductorMapScreenState createState() => _ConductorMapScreenState();
+  _AdminMapScreenState createState() => _AdminMapScreenState();
 }
 
-class _ConductorMapScreenState extends State<ConductorMapScreen> with WidgetsBindingObserver {
+class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObserver {
   GoogleMapController? mapController;
-  Location location = Location();
-  late LatLng _initialcameraposition;
-  late StreamSubscription<LocationData> locationSubscription;
-  late String _conductorId;
-  final DatabaseReference databaseReference =
-      FirebaseDatabase.instance.ref('user_locations');
-  Map<String, Marker> _markers = {};
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref('user_locations');
+  final Map<String, Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);  // Agregar observador
-    _initialcameraposition = LatLng(0.0, 0.0);
-    _conductorId = Uuid().v4();
-    locationSubscription = location.onLocationChanged.listen((LocationData currentLocation) {
-      _updateLocation(currentLocation);
-    });
-    _listenToUsuarioChanges();
-    _loadInitialUsuarioLocations();
+    WidgetsBinding.instance.addObserver(this);
+    _listenToLocationChanges();
+    _loadInitialLocations();
   }
 
-  Future<void> _updateLocation(LocationData locationData) async {
-    await databaseReference.child('conductores').child(_conductorId).set({
-      'latitude': locationData.latitude,
-      'longitude': locationData.longitude,
+  void _listenToLocationChanges() {
+    databaseReference.child('conductores').onChildChanged.listen((event) {
+      String conductorId = event.snapshot.key!;
+      Map<dynamic, dynamic>? data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data != null && data.containsKey('ubicacion')) {
+        Map<dynamic, dynamic>? ubicacion = data['ubicacion'] as Map<dynamic, dynamic>?;
+        if (ubicacion != null) {
+          double latitude = ubicacion['latitude'];
+          double longitude = ubicacion['longitude'];
+          _updateMarker(conductorId, latitude, longitude, 'Conductor');
+        }
+      }else{
+        _removeMarker(conductorId);
+      }
     });
-    setState(() {
-      _initialcameraposition = LatLng(locationData.latitude!, locationData.longitude!);
-    });
-  }
 
-  void _listenToUsuarioChanges() {
+    // Escuchar eliminación de conductores
+    databaseReference.child('conductores').child('ubicacion').onChildRemoved.listen((event) {
+      String conductorId = event.snapshot.key!;
+      _removeMarker(conductorId);
+    });
+
+    // Escuchar cambios en la ubicación de los usuarios
     databaseReference.child('usuarios').onChildChanged.listen((event) {
       String usuarioId = event.snapshot.key!;
-      Map<dynamic, dynamic> data = event.snapshot.value as Map<dynamic, dynamic>;
-      double latitude = data['latitude'];
-      double longitude = data['longitude'];
-      _updateMarker(usuarioId, latitude, longitude);
+      Map<dynamic, dynamic>? data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data != null && data.containsKey('latitude') && data.containsKey('longitude')) {
+        double latitude = data['latitude'];
+        double longitude = data['longitude'];
+        _updateMarker(usuarioId, latitude, longitude, 'Usuario');
+      }
+    });
+
+    // Escuchar eliminación de usuarios
+    databaseReference.child('usuarios').onChildRemoved.listen((event) {
+      String usuarioId = event.snapshot.key!;
+      _removeMarker(usuarioId);
     });
   }
 
-  void _loadInitialUsuarioLocations() async {
-    DataSnapshot snapshot = await databaseReference.child('usuarios').get();
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic>? usuarios = snapshot.value as Map<dynamic, dynamic>?;
+  void _removeMarker(String id) {
+    setState(() {
+      _markers.remove(id);
+    });
+  }
+
+  void _loadInitialLocations() async {
+    // Cargar ubicaciones iniciales de los conductores
+    DataSnapshot snapshotConductores = await databaseReference.child('conductores').get();
+    if (snapshotConductores.value != null) {
+      Map<dynamic, dynamic>? conductores = snapshotConductores.value as Map<dynamic, dynamic>?;
+      if (conductores != null) {
+        conductores.forEach((key, value) {
+          if (value is Map<dynamic, dynamic> && value.containsKey('ubicacion')) {
+            double latitude = value['ubicacion']['latitude'];
+            double longitude = value['ubicacion']['longitude'];
+            _updateMarker(key, latitude, longitude, 'Conductor');
+          }
+        });
+      }
+    }
+
+    // Cargar ubicaciones iniciales de los usuarios
+    DataSnapshot snapshotUsuarios = await databaseReference.child('usuarios').get();
+    if (snapshotUsuarios.value != null) {
+      Map<dynamic, dynamic>? usuarios = snapshotUsuarios.value as Map<dynamic, dynamic>?;
       if (usuarios != null) {
         usuarios.forEach((key, value) {
           if (value is Map<dynamic, dynamic>) {
             double latitude = value['latitude'];
             double longitude = value['longitude'];
-            _updateMarker(key, latitude, longitude);
+            _updateMarker(key, latitude, longitude, 'Usuario');
           }
         });
       }
     }
   }
 
-  Future<BitmapDescriptor> _getUserMarkerIconFromAsset() async {
+  Future<BitmapDescriptor> _getMarkerIconFromAsset(String assetName) async {
     return await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(48, 48)),
-      'assets/user_map.png',
+      const ImageConfiguration(size: Size(48, 48)),
+      assetName,
     );
   }
 
-  void _updateMarker(String id, double latitude, double longitude) async {
-    final icon = await _getUserMarkerIconFromAsset();
-
-    setState(() {
-      _markers.remove(id);  // Eliminar el marcador anterior
-      _markers[id] = Marker(
-        markerId: MarkerId(id),
-        position: LatLng(latitude, longitude),
-        icon: icon,
-        infoWindow: InfoWindow(title: 'Usuario $id'),
-      );
-    });
+  void _updateMarker(String id, double latitude, double longitude, String tipo) async {
+    final icon = await _getMarkerIconFromAsset(
+      tipo == 'Conductor' ? 'assets/bus.png' : 'assets/user_map.png',
+    );
+    if (mounted) {
+      setState(() {
+        _markers[id] = Marker(
+          markerId: MarkerId(id),
+          position: LatLng(latitude, longitude),
+          icon: icon,
+          infoWindow: InfoWindow(title: '$tipo $id'),
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
-    _removeConductorLocation();  // Eliminar la ubicación del conductor al cerrar la app
-    locationSubscription.cancel();
-    WidgetsBinding.instance.removeObserver(this);  // Eliminar observador
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  void _removeConductorLocation() {
-    databaseReference.child('conductores').child(_conductorId).remove();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.detached || state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      _removeConductorLocation();  // Eliminar la ubicación del conductor si la app se cierra o se pone en segundo plano
+      // Implementar lógica si es necesario
     }
   }
 
@@ -115,17 +139,51 @@ class _ConductorMapScreenState extends State<ConductorMapScreen> with WidgetsBin
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: _initialcameraposition,
-          zoom: 15.5,
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(-11.93291224406842, -76.69001321910912),
+          zoom: 11.0,
         ),
         onMapCreated: (GoogleMapController controller) {
           mapController = controller;
+          _addMarkers();
         },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         markers: Set<Marker>.of(_markers.values),
       ),
     );
+  }
+
+  void _addMarkers() async {
+    try {
+      // Marcador para Chosica
+      final chosicaIcon = await _getMarkerIconFromAsset('assets/chosica.png');
+      _markers['Chosica'] = Marker(
+        markerId: const MarkerId('Chosica'),
+        position: const LatLng(-11.972826145886723, -76.76051366983118),
+        icon: chosicaIcon,
+        infoWindow: const InfoWindow(
+          title: 'Chosica',
+          snippet: 'Paradero Chosica',
+        ),
+      );
+
+      // Marcador para Corcona
+      final corconaIcon = await _getMarkerIconFromAsset('assets/corcona.png');
+      _markers['Corcona'] = Marker(
+        markerId: const MarkerId('Corcona'),
+        position: const LatLng(-11.91023831303057, -76.5793607100342),
+        icon: corconaIcon,
+        infoWindow: const InfoWindow(
+          title: 'Corcona',
+          snippet: 'Paradero Corcona',
+        ),
+      );
+
+      // Forzar el setState para asegurarnos de que se actualizan los marcadores en el mapa
+      setState(() {});
+    } catch (e) {
+      print("Error cargando los iconos: $e");
+    }
   }
 }

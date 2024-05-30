@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../components/navigation_bar.dart'; // Importa la barra de navegación
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firestore
-
 
 class SignInPage1 extends StatefulWidget {
   const SignInPage1({super.key});
@@ -12,7 +10,6 @@ class SignInPage1 extends StatefulWidget {
 
 class _SignInPage1State extends State<SignInPage1> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _usuarioController = TextEditingController();
   final TextEditingController _contrasenaController = TextEditingController();
 
@@ -99,7 +96,7 @@ class _SignInPage1State extends State<SignInPage1> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () {
-                          _verificarCredenciales();
+                          _navegarABarraDeNavegacion();
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(10.0),
@@ -126,45 +123,13 @@ class _SignInPage1State extends State<SignInPage1> {
 
   Widget _gap() => const SizedBox(height: 16);
 
-  Future<void> _verificarCredenciales() async {
-    final String usuario = _usuarioController.text.trim();
-    final String contrasena = _contrasenaController.text.trim();
-
-    try {
-      final QuerySnapshot querySnapshot = await _firestore
-          .collection('conductores')
-          .where('nombre_usuario', isEqualTo: usuario)
-          .where('contrasena', isEqualTo: contrasena)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-
-        final String nombreUsuario = (querySnapshot.docs[0].data() as Map<String, dynamic>)['nombre_usuario'];
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Barra_Navegacion(nombreUsuario: nombreUsuario),
-          ),
-        );
-      } else {
-        // Mostrar un mensaje de error al usuario
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Credenciales incorrectas. Por favor, inténtalo de nuevo.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (error) {
-      // Mostrar un mensaje de error al usuario
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al verificar las credenciales. Por favor, inténtalo de nuevo.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+  void _navegarABarraDeNavegacion() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const Barra_Navegacion(),
+      ),
+    );
   }
 
   @override

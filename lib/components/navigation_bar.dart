@@ -7,9 +7,8 @@ import 'package:tesis_perfil_admin/pages/profile.dart';
 
 class Barra_Navegacion extends StatefulWidget {
 
-  final String nombreUsuario;
 
-  const Barra_Navegacion({super.key, required this.nombreUsuario});
+  const Barra_Navegacion({super.key});
 
   @override
   State<Barra_Navegacion> createState() => _Barra_Navegacion();
@@ -56,7 +55,11 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
               label: Text('2'),
               child: Icon(Icons.circle_notifications),
             ),
-            label: 'Notificaciones',
+            label: 'Notis',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.directions_bus),
+            label: 'Conductores',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month),
@@ -66,20 +69,20 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
       ),
       body: <Widget>[
         /// Usuario
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Profile(nombreUsuario: widget.nombreUsuario),
-          ),
-        ),
-
-        /// Mapa
         const Card(
           shadowColor: Colors.transparent,
           margin: EdgeInsets.all(8.0),
           child: SizedBox.expand(
-            child: ConductorMapScreen(),
+            child: Profile(),
+          ),
+        ),
+
+        /// Mapa
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: AdminMapScreen(),
           ),
         ),
 
@@ -88,6 +91,15 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
           padding: EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Notifications(),
+          ),
+        ),
+        
+        /// Conductores
+        const Card(
+          shadowColor: Colors.transparent,
+          margin: EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Horario(),
           ),
         ),
 
