@@ -46,7 +46,7 @@ class _SignInPage1State extends State<SignInPage1> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        "Ingresa tu Usuario y Contraseña proporcionado por el administrador",
+                        "Ingresa su usuario y contraseña de administrador",
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),

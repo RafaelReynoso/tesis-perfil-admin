@@ -1,20 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../components/chosica.dart';
-import '../components/bartolome.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
 
 class Horario extends StatefulWidget {
   const Horario({super.key});
 
   @override
-  State<Horario> createState() => _Horario();
+  State<Horario> createState() => _HorarioState();
 }
 
-class _Horario extends State<Horario> {
-  String? _selectedParadero;
-  final List<String> _paraderos = [
-    'Chosica',
-    'San Bartolome',
-  ];
+class _HorarioState extends State<Horario> {
+  String? _fileName;
+  String? _filePath;
+  bool _isFileLoaded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,76 +24,176 @@ class _Horario extends State<Horario> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Container con sombreado gris para el Row
             Container(
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: Colors.grey[200], // Color de fondo gris claro
-                borderRadius: BorderRadius.circular(8.0), // Bordes redondeados
-                boxShadow: [
-                  // Sombra para el Container
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  // Texto a la izquierda
-                  const Text(
-                    'Paradero:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Icon(
+                    Icons.calendar_month,
+                    color: Colors.grey[800],
                   ),
-                  const SizedBox(
-                      width: 8), // Espacio entre el texto y el dropdown
-                  // Dropdown a la derecha
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: _dropDown(),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Horario',
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
-            // Mostrar el componente según la selección
-            if (_selectedParadero == 'Chosica') const Chosica(),
-            if (_selectedParadero == 'San Bartolome') const Bartolome(),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['xlsx', 'xls'],
+                );
+
+                if (result != null) {
+                  setState(() {
+                    _fileName = result.files.first.name;
+                    _filePath = result.files.first.path!;
+                    _isFileLoaded = true;
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Por favor, selecciona un archivo.'),
+                    ),
+                  );
+                }
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.upload_file, size: 18, color: Colors.green),
+                  SizedBox(width: 8), // Espacio entre el ícono y el texto
+                  Text(
+                    'Seleccionar Horario',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (_isFileLoaded)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.teal, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.teal,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _fileName!,
+                      style: TextStyle(
+                        color: Colors.teal[800],
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                if (_isFileLoaded) {
+                  Reference storageRef = FirebaseStorage.instance
+                      .ref()
+                      .child('horarios')
+                      .child(_fileName!);
+                  await storageRef.putFile(File(_filePath!));
+
+                  String fileUrl = await FirebaseStorage.instance
+                      .ref('horarios/$_fileName')
+                      .getDownloadURL();
+                  await FirebaseFirestore.instance
+                      .collection('horarios')
+                      .doc('choferes')
+                      .set({'fileUrl': fileUrl});
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                      title: const Row(
+                        children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Éxito',
+                          style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        ],
+                      ),
+                      content: const Text('Horario publicado con éxito.'),
+                      actions: [
+                        TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Aceptar',style: TextStyle(
+                          color: Colors.green,
+                          ),),
+                        ),
+                      ],
+                      );
+                    },
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Por favor, selecciona un archivo antes de publicar.'),
+                    ),
+                  );
+                }
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.send, size: 18, color: Colors.green),
+                  SizedBox(width: 8), // Espacio entre el ícono y el texto
+                  Text(
+                    'Publicar Horario',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  // Helper method para crear el dropdown widget
-  Widget _dropDown() {
-    return DropdownButton<String>(
-      isExpanded: true, // Para que el dropdown ocupe todo el espacio disponible
-      value: _selectedParadero,
-      onChanged: (String? newValue) {
-        setState(() {
-          _selectedParadero = newValue;
-        });
-      },
-      items: _paraderos.map((String paradero) {
-        return DropdownMenuItem<String>(
-          value: paradero,
-          child: Text(paradero),
-        );
-      }).toList(),
-      underline: Container(),
-      hint: const Text(
-        'Seleccione un paradero', // Placeholder
-        style: TextStyle(
-            color: Colors.grey), // Puedes personalizar el estilo del texto
-      ), // Sin línea subrayada
     );
   }
 }

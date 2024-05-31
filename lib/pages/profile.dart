@@ -19,7 +19,7 @@ class Profile extends StatelessWidget {
                                     children: [
                                         const Divider(),
                                         Text(
-                                            'Chofer: Rafael',
+                                            'Nombre: Rafael',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleLarge
@@ -60,7 +60,7 @@ class _TopPortion extends StatelessWidget {
                 const Padding(
                     padding: EdgeInsets.only(top: 8.0),
                     child: Text(
-                        'Mi Perfil',
+                        'Administrador',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 24, // Puedes ajustar el tamaño de fuente si es necesario

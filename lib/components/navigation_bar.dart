@@ -3,6 +3,7 @@ import 'package:tesis_perfil_admin/pages/horario.dart';
 import 'package:tesis_perfil_admin/pages/map.dart';
 import 'package:tesis_perfil_admin/pages/notifications.dart';
 import 'package:tesis_perfil_admin/pages/profile.dart';
+import 'package:tesis_perfil_admin/pages/conductores.dart';
 
 
 class Barra_Navegacion extends StatefulWidget {
@@ -24,7 +25,7 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
       appBar: AppBar(
         title: const Center(
           child: Text(
-            'E.T. San Bartolome',
+            'E.T. San Bartolome - Administrador',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -99,7 +100,7 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
           shadowColor: Colors.transparent,
           margin: EdgeInsets.all(8.0),
           child: SizedBox.expand(
-            child: Horario(),
+            child: Conductores(),
           ),
         ),
 
