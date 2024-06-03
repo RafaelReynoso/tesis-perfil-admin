@@ -20,7 +20,30 @@ class _ConductoresState extends State<Conductores> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conductores', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold,),),
+        title: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.directions_bus,
+                    color: Colors.grey[800],
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Horario',
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
       ),
       body: FutureBuilder<DataSnapshot>(
         future: _conductoresRef.once().then((event) => event.snapshot),
@@ -73,7 +96,7 @@ class _ConductoresState extends State<Conductores> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        foregroundColor: Colors.green,
+        foregroundColor: const Color.fromARGB(255, 56, 183, 215),
         backgroundColor: Colors.white,
         onPressed: () {
           // Mostrar un diálogo para agregar un nuevo conductor
@@ -84,7 +107,7 @@ class _ConductoresState extends State<Conductores> {
             },
           );
         },
-        child: const Icon(Icons.add, color: Colors.green,), // Icono de agregar
+        child: const Icon(Icons.add, color: Color.fromARGB(255, 56, 183, 215)), // Icono de agregar
       ),
     );
   }

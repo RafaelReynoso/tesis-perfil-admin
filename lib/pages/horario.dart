@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:advance_pdf_viewer2/advance_pdf_viewer.dart';
 
 class Horario extends StatefulWidget {
   const Horario({Key? key}) : super(key: key);
@@ -75,12 +74,12 @@ class _HorarioState extends State<Horario> {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.upload_file, size: 18, color: Colors.green),
+                  Icon(Icons.upload_file, size: 18, color: Color.fromARGB(255, 56, 183, 215)),
                   SizedBox(width: 8), // Espacio entre el ícono y el texto
                   Text(
-                    'Seleccionar Horario (PDF)',
+                    'Seleccionar Horario',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Colors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -119,29 +118,14 @@ class _HorarioState extends State<Horario> {
             ElevatedButton(
               onPressed: () async {
                 if (_isFileLoaded) {
-                  final pdf = pw.Document();
-
-                  pdf.addPage(
-                    pw.Page(
-                      build: (context) {
-                        return pw.Center(
-                          child: pw.Text(
-                            'Contenido del horario aquí', // Aquí deberías incluir el contenido de tu horario
-                            style: pw.TextStyle(fontSize: 20),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-
-                  final pdfBytes = await pdf.save();
+                  final file = File(_filePath!);
                   final pdfFileName = 'horario.pdf'; // Nombre del archivo PDF
 
                   Reference storageRef = FirebaseStorage.instance
                       .ref()
                       .child('horarios')
                       .child(pdfFileName);
-                  await storageRef.putData(pdfBytes);
+                  await storageRef.putFile(file);
 
                   String fileUrl = await FirebaseStorage.instance
                       .ref('horarios/$pdfFileName')
@@ -159,13 +143,13 @@ class _HorarioState extends State<Horario> {
                           children: [
                             Icon(
                               Icons.check_circle,
-                              color: Colors.green,
+                              color: Color.fromARGB(255, 56, 183, 215),
                             ),
                             SizedBox(width: 10),
                             Text(
-                              'Éxito',
+                              'Exito',
                               style: TextStyle(
-                                color: Colors.green,
+                                color: Color.fromARGB(255, 56, 183, 215),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -181,7 +165,7 @@ class _HorarioState extends State<Horario> {
                             child: const Text(
                               'Aceptar',
                               style: TextStyle(
-                                color: Colors.green,
+                                color: Color.fromARGB(255, 56, 183, 215),
                               ),
                             ),
                           ),
@@ -201,12 +185,50 @@ class _HorarioState extends State<Horario> {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.send, size: 18, color: Colors.green),
+                  Icon(Icons.send, size: 18, color: Color.fromARGB(255, 56, 183, 215)),
                   SizedBox(width: 8), // Espacio entre el ícono y el texto
                   Text(
-                    'Publicar Horario (PDF)',
+                    'Publicar Horario',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            ElevatedButton(
+              onPressed: () async {
+                // Obtén la URL del PDF desde Firestore
+                DocumentSnapshot documentSnapshot = await FirebaseFirestore
+                    .instance
+                    .collection('horarios')
+                    .doc('choferes')
+                    .get();
+                String pdfUrl = documentSnapshot['fileUrl'];
+
+                // Espera a que el PDF se cargue desde la URL
+                final PDFDocument document = await PDFDocument.fromURL(pdfUrl);
+
+                // Muestra el PDF en un visor
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PDFViewer(document: document),
+                  ),
+                );
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.visibility, size: 18, color: Color.fromARGB(255, 56, 183, 215)),
+                  SizedBox(width: 8), // Espacio entre el ícono y el texto
+                  Text(
+                    'Mostrar Horario',
+                    style: TextStyle(
+                      color: Colors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

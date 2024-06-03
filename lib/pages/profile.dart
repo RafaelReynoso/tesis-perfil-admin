@@ -19,7 +19,7 @@ class Profile extends StatelessWidget {
                                     children: [
                                         const Divider(),
                                         Text(
-                                            'Nombre: Rafael',
+                                            'Admin: Rafael',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleLarge

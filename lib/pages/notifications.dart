@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Notificaciones',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const Notifications(),
-    );
-  }
-}
-
 class Notifications extends StatelessWidget {
   const Notifications({super.key});
 
@@ -22,7 +7,30 @@ class Notifications extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones'),
+        title: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.circle_notifications,
+                    color: Colors.grey[800],
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Notificaciones',
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.admin_panel_settings),
@@ -178,8 +186,8 @@ class _AdminPanelDialogState extends State<AdminPanelDialog> {
                     // Aquí se podría agregar la lógica para enviar la notificación
                     // por ejemplo, agregar la notificación a una lista o enviarla a un servidor
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Notificación enviada')),
-                    );
+                      const SnackBar(content: Text('Notificación enviada'),
+                    ));
                     Navigator.of(context).pop();
                   }
                 },

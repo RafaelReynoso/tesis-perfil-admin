@@ -32,7 +32,7 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
             ),
           ),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: const Color.fromARGB(255, 56, 183, 215),
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -40,7 +40,7 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.green,
+        indicatorColor: const Color.fromARGB(255, 56, 183, 215),
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
@@ -53,7 +53,6 @@ class _Barra_Navegacion extends State<Barra_Navegacion> {
           ),
           NavigationDestination(
             icon: Badge(
-              label: Text('2'),
               child: Icon(Icons.circle_notifications),
             ),
             label: 'Notis',
