@@ -32,18 +32,16 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
           double longitude = ubicacion['longitude'];
           _updateMarker(conductorId, latitude, longitude, 'Conductor');
         }
-      }else{
+      } else {
         _removeMarker(conductorId);
       }
     });
 
-    // Escuchar eliminación de conductores
-    databaseReference.child('conductores').child('ubicacion').onChildRemoved.listen((event) {
+    databaseReference.child('conductores').onChildRemoved.listen((event) {
       String conductorId = event.snapshot.key!;
       _removeMarker(conductorId);
     });
 
-    // Escuchar cambios en la ubicación de los usuarios
     databaseReference.child('usuarios').onChildChanged.listen((event) {
       String usuarioId = event.snapshot.key!;
       Map<dynamic, dynamic>? data = event.snapshot.value as Map<dynamic, dynamic>?;
@@ -54,7 +52,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
       }
     });
 
-    // Escuchar eliminación de usuarios
     databaseReference.child('usuarios').onChildRemoved.listen((event) {
       String usuarioId = event.snapshot.key!;
       _removeMarker(usuarioId);
@@ -68,7 +65,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
   }
 
   void _loadInitialLocations() async {
-    // Cargar ubicaciones iniciales de los conductores
     DataSnapshot snapshotConductores = await databaseReference.child('conductores').get();
     if (snapshotConductores.value != null) {
       Map<dynamic, dynamic>? conductores = snapshotConductores.value as Map<dynamic, dynamic>?;
@@ -83,7 +79,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
       }
     }
 
-    // Cargar ubicaciones iniciales de los usuarios
     DataSnapshot snapshotUsuarios = await databaseReference.child('usuarios').get();
     if (snapshotUsuarios.value != null) {
       Map<dynamic, dynamic>? usuarios = snapshotUsuarios.value as Map<dynamic, dynamic>?;
@@ -110,13 +105,29 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
     final icon = await _getMarkerIconFromAsset(
       tipo == 'Conductor' ? 'assets/bus.png' : 'assets/user_map.png',
     );
+    
+    String nombre = '';
+    String placa = '';
+
+    if (tipo == 'Conductor') {
+      DataSnapshot snapshot = await databaseReference.child('conductores/$id/informacion').get();
+      if (snapshot.value != null) {
+        Map<dynamic, dynamic>? info = snapshot.value as Map<dynamic, dynamic>?;
+        nombre = id;
+        placa = info != null ? info['placa'] : '';
+      }
+    }
+
     if (mounted) {
       setState(() {
         _markers[id] = Marker(
           markerId: MarkerId(id),
           position: LatLng(latitude, longitude),
           icon: icon,
-          infoWindow: InfoWindow(title: '$tipo $id'),
+          infoWindow: InfoWindow(
+            title: '$nombre',
+            snippet: 'Placa: $placa',
+          ),
         );
       });
     }
@@ -156,7 +167,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
 
   void _addMarkers() async {
     try {
-      // Marcador para Chosica
       final chosicaIcon = await _getMarkerIconFromAsset('assets/chosica.png');
       _markers['Chosica'] = Marker(
         markerId: const MarkerId('Chosica'),
@@ -168,7 +178,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
         ),
       );
 
-      // Marcador para Corcona
       final corconaIcon = await _getMarkerIconFromAsset('assets/corcona.png');
       _markers['Corcona'] = Marker(
         markerId: const MarkerId('Corcona'),
@@ -180,7 +189,6 @@ class _AdminMapScreenState extends State<AdminMapScreen> with WidgetsBindingObse
         ),
       );
 
-      // Forzar el setState para asegurarnos de que se actualizan los marcadores en el mapa
       setState(() {});
     } catch (e) {
       print("Error cargando los iconos: $e");
